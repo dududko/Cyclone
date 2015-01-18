@@ -47,9 +47,9 @@ class CycloneDatabase:
                 # if 700 > distance(cycl1.mcPos[-1], cycls[idx].mcPos[0]) < distance(cycl1.mcPos[-1], cycls[idx].pos[0]):
                 # cycl1.appendMassCenter(cycls[idx].mc[0])
                 # cycl1.appendMassCenterPos(cycls[idx].mcPos[0])
-                #else:
-                #    cycl1.appendMassCenter(cycls[idx].ids[0][::-1])
-                #    cycl1.appendMassCenterPos(cycls[idx].pos[0])
+                # else:
+                # cycl1.appendMassCenter(cycls[idx].ids[0][::-1])
+                # cycl1.appendMassCenterPos(cycls[idx].pos[0])
                 cycl1.appendMassCenter(cycls[idx].mc[0])
                 cycl1.appendMassCenterPos(cycls[idx].mcPos[0])
                 cycl1.time.append(cycls[idx].time[0])
@@ -57,6 +57,7 @@ class CycloneDatabase:
                 cycl1.area.append(cycls[idx].area[0])
                 cycl1.rad.append(cycls[idx].rad[0])
                 cycl1.angle.append(cycls[idx].angle[0])
+                cycl1.part.append(cycls[idx].part[0])
                 cycl1.distance += distance(cycl1.pos[-2], cycl1.pos[-1])
 
                 cycl1.setMaximums(cycls[idx].maximums)
@@ -123,6 +124,8 @@ class CycloneDatabase:
                 rmin.text = str(c.rad[i][0])
                 angle = ET.SubElement(cycloneCenter, "angle")
                 angle.text = str(c.angle[i])
+                part = ET.SubElement(cycloneCenter, "part")
+                part.text = str(c.part[i])
 
         tree = ET.ElementTree(root)
         tree.write('test\\result_all\\' + year + ".xml", pretty_print=True)
@@ -226,9 +229,9 @@ class CycloneData:
                 # if mLatLon[a / 45][1] <= self.lon[j]:
                 # break
                 # x1 = [i for i, x in enumerate(self.lat) if (len(maximum) > 0.) & (abs(x - maximum[0]) < 0.125)]
-                #y1 = [i for i, x in enumerate(self.lon) if (len(maximum) > 0.) & (abs(x - maximum[1]) < 0.125)]
-                #if (len(x1) > 0) & (len(y1) > 0):
-                #maximums.append([i, j])
+                # y1 = [i for i, x in enumerate(self.lon) if (len(maximum) > 0.) & (abs(x - maximum[1]) < 0.125)]
+                # if (len(x1) > 0) & (len(y1) > 0):
+                # maximums.append([i, j])
         res = 0
         if count >= 6:
             res = sum(mMSL) / count
@@ -292,17 +295,17 @@ class CycloneData:
                         point = self.getMidPoint(s[0], s[-1])
                         point = self.lonToIdx(point[0]), self.latToIdx(point[1])
                         s = np.vstack((s, [point[0], 0]))
-                        #s = np.vstack((s, [(s[0][0] + s[-1][0]) / 2, 0]))
+                        # s = np.vstack((s, [(s[0][0] + s[-1][0]) / 2, 0]))
                     if s[0][0] == 0 and s[-1][0] == 0:
                         point = self.getMidPoint(s[0], s[-1])
                         point = self.lonToIdx(point[0]), self.latToIdx(point[1])
                         s = np.vstack((s, [0, point[1]]))
-                        #s = np.vstack((s, [0, c.ids[0][0]]))
+                        # s = np.vstack((s, [0, c.ids[0][0]]))
                     if s[0][0] == len(self.lon) - 1 and s[-1][0] == len(self.lon) - 1:
                         point = self.getMidPoint(s[0], s[-1])
                         point = self.lonToIdx(point[0]), self.latToIdx(point[1])
                         s = np.vstack((s, [len(self.lon) - 1, point[1]]))
-                        #s = np.vstack((s, [len(self.lon) - 1, (s[0][1] + s[-1][1]) / 2]))
+                        # s = np.vstack((s, [len(self.lon) - 1, (s[0][1] + s[-1][1]) / 2]))
                     if s[0][1] == 0 and s[-1][0] == 0:
                         s = np.vstack((s, [0, 0]))
                     if s[0][1] == 0 and s[-1][0] == len(self.lon) - 1:
@@ -327,7 +330,7 @@ class CycloneData:
                             (c.ids[0][0] == 0 and s[0][0] <= c.ids[0][1] <= s[-2][0]) or \
                             (c.ids[0][1] == 0 and s[0][1] >= c.ids[0][0] >= s[-2][1]) or \
                             (c.ids[0][1] == 0 and s[0][1] >= c.ids[0][0] >= s[-1][1]):
-                        #(s[0][1] == c.ids[0][0] and s[0][0] <= c.ids[0][1]) or \
+                        # (s[0][1] == c.ids[0][0] and s[0][0] <= c.ids[0][1]) or \
 
                         s2 = s1
                         s1 = s
@@ -341,7 +344,7 @@ class CycloneData:
 
                         area = area_of_polygon(list(x), list(y))
 
-                        #print k, "msl:", msl, area / area1
+                        # print k, "msl:", msl, area / area1
 
                         la1 = self.lat[int(s[0][1])]
                         lo1 = self.lon[int(s[0][0])]
@@ -356,7 +359,7 @@ class CycloneData:
 
                         delta1 = area / area1 - delta
                         delta = area / area1
-                        #print (k, msl, delta, d, area)
+                        # print (k, msl, delta, d, area)
                         if (((area / area1) > 1.19) and (14 > k > 12) and msl > 980) \
                                 or (((area / area1) > 5) and (k >= 5)) \
                                 or (((area / area1) > 1.5) and (k >= 10) and msl > 970) \
@@ -374,13 +377,13 @@ class CycloneData:
                             c.setMassCenter(mc)
                             c.setMassCenterPos(mcPos)
 
-                        if isClosed and k < 20:
+                        '''if isClosed and k < 20:
                             dists = [distance(c.mcPos[0], (self.lati(i[1]), self.loni(i[0]))) for i in
                                      dom[0:(len(dom) - 4)]]
                             c.setRadius((min(dists), max(dists)))
                             maxIdx = dists.index(max(dists))
                             maxPos = (self.lati(dom[maxIdx][1]), self.loni(dom[maxIdx][0]))
-                            c.setAngle(getAzimuth(c.mcPos[0], maxPos))
+                            c.setAngle(getAzimuth(c.mcPos[0], maxPos))'''
 
                 if len(dom) == 0:
                     remove.append(j)
@@ -390,6 +393,7 @@ class CycloneData:
             c.omsl.append(msl - 0.5)
             c.area.append(area1)
             c.setDomain(dom)
+            self.findRauses(c)
             self.checkBaltik(c)
 
         res = diff(range(0, len(self.cyclones)), remove)
@@ -406,10 +410,10 @@ class CycloneData:
         res = diff(range(0, len(m)), remove)
         return m[res]
 
-    def findRauses(self):
+    '''def findRauses(self):
         for c in self.cyclones:
             dists = [distance(c.mcPos[0], (self.lati(i[1]), self.loni(i[0]))) for i in c.dom]
-            c.setRadius((min(dists), max(dists)))
+            c.setRadius((min(dists), max(dists)))'''
 
     def getMidPoint(self, p1, p2):
         p = ((self.lon[int(p1[0])] + self.lon[int(p2[0])]) / 2, (self.lat[int(p1[1])] + self.lat[int(p2[1])]) / 2)
@@ -439,3 +443,90 @@ class CycloneData:
                 break
         if isB:
             c.isBaltik = True
+
+    def findRauses(self, c):
+        part = ''
+        parts = 6
+        p1 = c.pos[0]
+        radiuses = [0] * (360 / parts)
+        diameters = [0] * (360 / parts / 2)
+        radiusesall = [0] * 360
+        neighbours = range(-parts / 2, parts / 2, 1)
+        for p in c.dom:
+            plat = self.lat[int(p[1])]
+            plon = self.lon[int(p[0])]
+            p2 = (plat, plon)
+
+            dist = distance(p1, p2)
+            if p1[0] == p2[0] or p1[1] == p2[1]:
+                continue
+            angle = getAzimuth(p1, p2)
+
+            radiusesall[int(angle - 0.0001)] = max(radiusesall[int(angle - 0.0001)], dist)
+        radiuses = [max(radiusesall[(id + id2) % 360] for id2 in neighbours) for id in range(0, len(radiusesall), parts)]
+        diameters = [(radiuses[i] + radiuses[len(diameters) + i]) for i in range(len(diameters))]
+        maxID = diameters.index(max(diameters))
+        maxDiam = max(diameters)
+        maxRad = maxDiam
+        angle = maxID * parts
+
+        minID = (maxID + len(diameters) / 2) % len(diameters)
+        minRad = 0
+        if max(diameters) != max(radiuses):
+            maxRad = maxDiam / 2
+        if diameters[minID] != 0:
+            if max(radiuses[minID], radiuses[minID - len(diameters)]) == diameters[minID]:
+                minRad = diameters[minID]
+                if maxDiam == maxRad:
+                    part = 'quoter'
+                else:
+                    part = 'half'
+
+            else:
+                minRad = diameters[minID] / 2
+                if maxDiam == maxRad:
+                    part = 'half'
+                else:
+                    part = 'all'
+        else:
+            for i in range(1, len(diameters) / 2, 1):
+                id1 = (minID + i) % len(diameters)
+                id2 = (minID - i) % len(diameters)
+                val1 = diameters[id1]
+                val2 = diameters[id2]
+                if val1 != 0:
+                    if max(radiuses[id1], radiuses[id1 - len(diameters)]) == diameters[id1]:
+                        minRad = diameters[id1]
+                        if maxDiam == maxRad:
+                            part = 'quoter'
+                        else:
+                            part = 'half'
+                    else:
+                        minRad = diameters[id1] / 2
+                        if maxDiam == maxRad:
+                            part = 'half'
+                        else:
+                            part = 'all'
+                elif val2 != 0:
+                    if max(radiuses[id2], radiuses[id2 - len(diameters)]) == diameters[id2]:
+                        minRad = diameters[id2]
+                        if maxDiam == maxRad:
+                            part = 'quoter'
+                        else:
+                            part = 'half'
+                    else:
+                        minRad = diameters[id2] / 2
+                        if maxDiam == maxRad:
+                            part = 'half'
+                        else:
+                            part = 'all'
+                if minRad != 0:
+                    break
+
+        c.setAngle(angle)
+        c.setRadius([maxRad, minRad])
+        c.setPart(part)
+        radiuses = []
+        diameters = []
+        radiusesall = []
+        return 1

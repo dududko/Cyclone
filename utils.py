@@ -32,18 +32,25 @@ def getPoint(p, d, a):
 
     return degrees(lat2), degrees(lon2)
 
+
 def getAzimuth(p1, p2):
     lat1 = radians(p1[0])
     lon1 = radians(p1[1])
     lat2 = radians(p2[0])
     lon2 = radians(p2[1])
 
-    b = acos(cos(radians(90) - lat2) * cos(radians(90) - lat1) + sin(radians(90) - lat2) * sin(radians(90) - lat1) * cos(lon2 - lon1))
-    A = degrees(asin(sin(radians(90) - lat2) * sin(lon2 - lon1) / sin(b)))
+    try:
+        b = acos(
+            cos(radians(90) - lat2) * cos(radians(90) - lat1) + sin(radians(90) - lat2) * sin(radians(90) - lat1) * cos(
+                lon2 - lon1))
+        A = degrees(asin(sin(radians(90) - lat2) * sin(lon2 - lon1) / sin(b)))
+    except ZeroDivisionError:
+        print(b)
 
-    if A < 0:
+    if lat1 < lat2 and lon2 <= lon1:
         A += 360
-
+    elif lat1 >= lat2:
+        A = -(A - 180)
     return A
 
 
@@ -85,3 +92,4 @@ def area_of_polygon(x, y):
     for i in xrange(-1, len(x) - 1):
         area += x[i] * (y[i + 1] - y[i - 1])
     return abs(area) / 2.0 / 10 ** 6
+

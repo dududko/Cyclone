@@ -19,7 +19,7 @@ from utils import getPoint
 
 gaussSigma = 1
 gaussSize = 10
-globalID = 7
+globalID = 0
 
 ###############################################################################
 

@@ -27,6 +27,7 @@ class Cyclone:
         self.time = [globaltime]
         self.wasChanged = False
         self.isBaltik = False
+        self.part = []
 
     def set_size(self, size_x, size_y):
         self.sizeX = size_x
@@ -66,6 +67,9 @@ class Cyclone:
 
     def setRadius(self, rad):
         self.rad = [rad]
+
+    def setPart(self, part):
+        self.part = [part]
 
     def setAngle(self, a):
         self.angle = [a]

@@ -26,7 +26,7 @@ print('list of files')
 for fn in os.listdir('E:\\ifmo_damb\\data\\'):
     print fn
 
-ncfile = Dataset('E:\\ifmo_damb\\data\\netcdf_1994.nc', 'r')
+ncfile = Dataset('E:\\ifmo_damb\\data\\netcdf_2000.nc', 'r')
 
 press = ncfile.variables['msl']
 for i in ncfile.variables:
@@ -104,7 +104,7 @@ def getNextCycloneData(indFile, indTime):
 class Index:
     indFile = 0
     # indTime = 229
-    indTime = 1125
+    indTime = 9
     globalInd = 0
     #stopInd = len(press) - 1
     stopInd = 1360
@@ -267,7 +267,6 @@ def key_event(e):
     global curr_pos
 
     if e.key == "right":
-
         while (True):
             callback.next()
     elif e.key == "left":
