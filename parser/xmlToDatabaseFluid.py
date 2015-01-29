@@ -6,10 +6,11 @@ import datetime as dt
 import random
 from BeautifulSoup import BeautifulStoneSoup, Tag, NavigableString, BeautifulSoup
 from cyclonep import Cyclone
+from utils import distance
 
 cyclones = []
 
-soup = BeautifulSoup(open('..\\test\\result_all_new\\europe.xml'))  # get the parser for the xml file
+soup = BeautifulSoup(open('..\\test\\result_all_new\\baltik_flood.xml'))  # get the parser for the xml file
 #soup = BeautifulSoup(open('..\\test\\result_baltik\\1957.xml'))  # get the parser for the xml file
 
 
@@ -48,7 +49,7 @@ for i in range(1, len(soup.root.contents), 2):
 for c in cyclones:
     c.findVelocity()
 #cyclones = [c for c in cyclones if len([True for i in range(len(c.latitude)) if 6.5 <= c.longitude[i] <= 33.5 and 53.5 <= c.latitude[i] <= 66]) > 0]
-'''
+
 fluidDates = []
 fluidDatesIn = [[1957,25,10,170],
 [1958,18,5,168 ],
@@ -164,12 +165,15 @@ for c in cyclones:
         water.append(id)
         resId.append(i)
         flag = False
+
+
     i += 1
 cyclones = [cyclones[i] for i in resId]
 water = [fluidDatesIn[i][3] for i in water]
 
+
 print len(cyclones)
-'''
+
 '''plt.figure(1)
 x = [c.lifetime for c in cyclones]
 print max(x)
@@ -324,6 +328,22 @@ writer.close()
 
 #####################################################
 
+writer = open("water.csv", "wb")
+entries = ['%s\n' % format(i, "10.3f") for i in water]
+for e in entries:
+    writer.write(e)
+writer.close()
+
+#####################################################
+
+writer = open("distance_to_gulf_of_finland.csv", "wb")
+entries = ['%s  \n' % ",".join((format(distance((i.latitude[x], i.longitude[x]), (60, i.longitude[x])), "10.3f") for x in range(len(i.angle)))) for i in cyclones]
+for e in entries:
+    writer.write(e)
+writer.close()
+
+#####################################################
+
 writer = open("depth.csv", "wb")
 entries = ['%s  \n' % ",".join((format(x, "10.3f") for x in i.depth)) for i in cyclones]
 for e in entries:
@@ -338,14 +358,6 @@ for e in entries:
     writer.write(e)
 writer.close()
 
-#####################################################
-'''
-writer = open("water.csv", "wb")
-entries = ['%s\n' % format(i, "10.3f") for i in water]
-for e in entries:
-    writer.write(e)
-writer.close()
-'''
 #####################################################
 
 
@@ -386,13 +398,19 @@ def saveToFile(data, name):
             rmin.text = str(c.radiusMin[i])
             angle = ET.SubElement(cycloneCenter, "angle")
             angle.text = str(c.angle[i])
+            if len(c.pressure) == 1:
+                velocity = ET.SubElement(cycloneCenter, "velocity")
+                velocity.text = str(c.velocity[0])
+            else:
+                velocity = ET.SubElement(cycloneCenter, "velocity")
+                velocity.text = str(0)
 
     tree = ET.ElementTree(root)
     tree.write('..\\test\\result_all_new\\' + name + '.xml', pretty_print=True)
     return
 
 
-#saveToFile(cyclones, 'baltik_flood')
+saveToFile(cyclones, 'baltik_flood')
 
 #cyclonesb = [c for c in cyclones if len([True for i in range(len(c.latitude)) if 6.5 <= c.longitude[i] <= 33.5 and 53.5 <= c.latitude[i] <= 66]) > 0]
 #cyclonesb = [c for c in cyclones if c.isBaltik]

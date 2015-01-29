@@ -19,7 +19,7 @@ from utils import getPoint
 
 gaussSigma = 1
 gaussSize = 10
-globalID = 0
+globalID = 6
 
 ###############################################################################
 
@@ -62,7 +62,7 @@ class FileData:
         self.ncfile.close()
 
 #yearNum = [1957, 1969, 1980, 1991]
-yearNum = [1957, 1963, 1969, 1975, 1980, 1986, 1992, 1974][globalID]
+yearNum = [1957, 1963, 1970, 1975, 1982, 1986, 1993, 1997][globalID]
 fileData = FileData(yearNum)
 
 
@@ -102,7 +102,7 @@ class Index:
         self.indTime = 0
         self.globalInd = 0
         self.stopInd = len(fileData.press) - 1
-        self.stopYear = [1962, 1968, 1974, 1979, 1985, 1991, 1996, 1974][globalID]
+        self.stopYear = [1962, 1969, 1974, 1981, 1985, 1992, 1996, 2002][globalID+1]
 
     def next(self):
         if self.globalInd == self.stopInd and self.yearNum == self.stopYear:

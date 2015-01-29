@@ -36,8 +36,8 @@ class CycloneDatabase:
 
             distances2 = [distance(cycl1.pos[-1], cycl2.pos[0]) for cycl2 in cycls]
 
-            if (val < 700 and val <= val1) or (distances2[idx] < 700) \
-                    or (len(self.lastCyclones) == 1 and val < 1000):
+            if (val < 500 and val <= val1) or (distances2[idx] < 500) \
+                    or (len(self.lastCyclones) == 1 and val < 500):
                 cycl1.appendParams(cycls[idx].pos[0],
                                    cycls[idx].ids[0],
                                    cycls[idx].msl[0],
@@ -119,16 +119,16 @@ class CycloneDatabase:
                 lon = ET.SubElement(cycloneCenter, "longitude")
                 lon.text = str(c.mcPos[i][1])
                 rmax = ET.SubElement(cycloneCenter, "radiusMax")
-                rmax.text = str(c.rad[i][1])
-                rmin = ET.SubElement(cycloneCenter, "radiusmin")
-                rmin.text = str(c.rad[i][0])
+                rmax.text = str(c.rad[i][0])
+                rmin = ET.SubElement(cycloneCenter, "radiusMin")
+                rmin.text = str(c.rad[i][1])
                 angle = ET.SubElement(cycloneCenter, "angle")
                 angle.text = str(c.angle[i])
                 part = ET.SubElement(cycloneCenter, "part")
                 part.text = str(c.part[i])
 
         tree = ET.ElementTree(root)
-        tree.write('test\\result_all\\' + year + ".xml", pretty_print=True)
+        tree.write('test\\result_all_new\\' + year + ".xml", pretty_print=True)
         return
 
 
@@ -145,14 +145,14 @@ class CycloneData:
         # need to detect contours
         self.mslArr = np.array(self.msl)
         # self.mslArr += 5
-        # self.mslArr = ndimage.gaussian_filter(self.mslArr, sigma=(sigma, size), order=0)
+        self.mslArr = ndimage.gaussian_filter(self.mslArr, sigma=(sigma, size), order=0)
         # self.mslArr -= 5
         self.x, self.y = np.mgrid[:self.mslArr.shape[0], :self.mslArr.shape[1]]
         # self.y = self.y.max() - self.y
         self.c = cntr.Cntr(self.y, self.x, self.mslArr)
 
         ###################################################################################
-        self.mins = self.extrema(self.msl)
+        self.mins = self.extrema(self.mslArr)
         self.func = self.interpolate()
         self.lati = interpolate.interp1d(range(len(lat)), lat)
         self.loni = interpolate.interp1d(range(len(lon)), lon)
@@ -166,7 +166,7 @@ class CycloneData:
             isCycl, meanMSL, maximums = self.isCyclone([self.mins[0][i], self.mins[1][i]])
             if isCycl:
                 res.append(i)
-                self.cyclones.append(Cyclone(self.msl[(self.mins[0][i], self.mins[1][i])],
+                self.cyclones.append(Cyclone(self.mslArr[(self.mins[0][i], self.mins[1][i])],
                                              (lat[self.mins[0][i]], lon[self.mins[1][i]]),
                                              (self.mins[0][i], self.mins[1][i]),
                                              meanMSL, "", 0, time))
@@ -278,6 +278,9 @@ class CycloneData:
 
             s1 = []
             dom = []
+            doms = []
+            areak = []
+
             # print("#######################")
             # print ("segments")
 
@@ -363,13 +366,18 @@ class CycloneData:
                         if (((area / area1) > 1.19) and (14 > k > 12) and msl > 980) \
                                 or (((area / area1) > 5) and (k >= 5)) \
                                 or (((area / area1) > 1.5) and (k >= 10) and msl > 970) \
-                                or (30 > k > 20 and delta1 > 0.08) \
-                                or (35 > k > 30 and delta1 > 0.06) \
-                                or (k >= 35 and delta1 > 0.10) \
-                                or (k > 40 and d1 != 0 and d / d1 > 1.5 and d > 500) \
-                                or (k < 10 and d > 500):
+                                or (msl > 975 and 30 > k > 20 and delta1 > 0.08) \
+                                or (msl > 975 and 35 > k > 30 and delta1 > 0.06) \
+                                or (msl > 975 and k >= 35 and delta1 > 0.10) \
+                                or (msl > 975 and k > 40 and d1 != 0 and d / d1 > 1.5 and d > 500) \
+                                or (msl > 975 and k < 10 and d > 500) \
+                                or msl > 990:
                             dom = s2
                             isClosed = False
+                        '''if msl > 990 or d > 500:
+                            isClosed = False
+                        doms.append(s2)
+                        areak.append((msl,area / area1))'''
 
                         if isClosed and 5 >= abs(msl - c.msl[0]):
                             mc = massCenter(dom)
@@ -377,24 +385,17 @@ class CycloneData:
                             c.setMassCenter(mc)
                             c.setMassCenterPos(mcPos)
 
-                        '''if isClosed and k < 20:
-                            dists = [distance(c.mcPos[0], (self.lati(i[1]), self.loni(i[0]))) for i in
-                                     dom[0:(len(dom) - 4)]]
-                            c.setRadius((min(dists), max(dists)))
-                            maxIdx = dists.index(max(dists))
-                            maxPos = (self.lati(dom[maxIdx][1]), self.loni(dom[maxIdx][0]))
-                            c.setAngle(getAzimuth(c.mcPos[0], maxPos))'''
-
-                if len(dom) == 0:
-                    remove.append(j)
-
                 msl += 0.5
-
-            c.omsl.append(msl - 0.5)
-            c.area.append(area1)
-            c.setDomain(dom)
-            self.findRauses(c)
-            self.checkBaltik(c)
+            if len(dom) == 0:
+                remove.append(j)
+            if len([i for i in remove if i == j]) == 0:
+                c.omsl.append(msl - 0.5)
+                c.area.append(area1)
+                c.setDomain(dom)
+                mc = massCenter(dom)
+                mcPos = (self.lat[int(mc[1])], self.lon[int(mc[0])])
+                self.findRauses(c, mcPos)
+                self.checkBaltik(c)
 
         res = diff(range(0, len(self.cyclones)), remove)
         self.cyclones = self.cyclones[res]
@@ -441,13 +442,12 @@ class CycloneData:
             if 6.5 <= plon <= 33.5 and 53.5 <= plat <= 66:
                 isB = True
                 break
-        if isB:
+        if isB or (6.5 <= c.mcPos[0][1] <= 33.5 and 53.5 <= c.mcPos[0][0] <= 66):
             c.isBaltik = True
 
-    def findRauses(self, c):
+    def findRauses(self, c, p1):
         part = ''
         parts = 6
-        p1 = c.pos[0]
         radiuses = [0] * (360 / parts)
         diameters = [0] * (360 / parts / 2)
         radiusesall = [0] * 360
@@ -463,7 +463,8 @@ class CycloneData:
             angle = getAzimuth(p1, p2)
 
             radiusesall[int(angle - 0.0001)] = max(radiusesall[int(angle - 0.0001)], dist)
-        radiuses = [max(radiusesall[(id + id2) % 360] for id2 in neighbours) for id in range(0, len(radiusesall), parts)]
+        radiuses = [max(radiusesall[(id + id2) % 360] for id2 in neighbours) for id in
+                    range(0, len(radiusesall), parts)]
         diameters = [(radiuses[i] + radiuses[len(diameters) + i]) for i in range(len(diameters))]
         maxID = diameters.index(max(diameters))
         maxDiam = max(diameters)
